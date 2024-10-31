@@ -10,14 +10,14 @@ Resources: Helpful code snippets and references for working with R packages and 
 Getting Started
 Requirements: Ensure R (version 4.0+) and RStudio are installed.
 Packages: Install required packages listed in each script or project.
-r
-Copy code
+# R
+(Copy code)
 install.packages("package_name")
 
 # Usage
 Clone this repository to explore the scripts and projects:
 
-bash
+# bash
 Copy code
 git clone https://github.com/Elly-su/R101.git
 
