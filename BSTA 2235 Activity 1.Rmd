@@ -1,0 +1,101 @@
+---
+title: "BSTA 2235 Activity 1"
+author: "ELLY OCHIENG"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+# Loading the  necessary libraries
+library(tidyverse)
+
+# URL to the dataset
+url <- "https://statacumen.com/teach/RSM/data/RSM_TAB_02-08.txt"
+
+# Reading the data 
+library(data.table)
+data <- fread(url)
+head(data)
+
+#1 Replacing the coded values of "9" with the square root of 9
+data[data == 9] <- sqrt(9)
+
+# Viewing  the updated data
+head(data)
+
+# Load the rsm package
+library(rsm)
+
+#2 Fitting  a first-order model assuming y is the response variable, x1 and x2 are the predictors.
+model_fo <- rsm(y ~ FO(x1, x2), data = data)
+
+# Viewing the model summary
+summary(model_fo)
+
+#3  Fiting a first-order model with two-way interactions
+model_twi <- rsm(y ~ FO(x1, x2) + TWI(x1, x2), data = data)
+
+# Viewing the model summary
+summary(model_twi)
+
+#4  Fitting the second-order model
+model_so <- rsm(y ~ SO(x1, x2), data = data)
+
+# Viewing the model summary
+summary(model_so)
+
+#5 Fitting the second order model without interactions
+model_so_without_interaction <- lm(y ~ x1 + x2 + I(x1^2) + I(x2^2), data = data)
+
+# View the model summary
+summary(model_so_without_interaction)
+
+## Evaluating the model fits (using the R-squared vaue) to determine the best model
+r_squared_fo <- 1 - (sum(residuals(model_fo)^2) / sum((data$y - mean(data$y))^2))
+r_squared_twi <- 1 - (sum(residuals(model_twi)^2) / sum((data$y - mean(data$y))^2))
+r_squared_so <- 1 - (sum(residuals(model_so)^2) / sum((data$y - mean(data$y))^2))
+r_squared_so_no_interaction <- summary(model_so_without_interaction)$r.squared
+
+cat("R-squared values:\n")
+cat("First-order model:", summary(model_fo)$r.squared, "\n")
+cat("First-order with interactions:", summary(model_twi)$r.squared, "\n")
+cat("Second-order model:", summary(model_so)$r.squared, "\n")
+cat("Second-order without interactions:", summary(model_so_without_interaction)$r.squared, "\n")
+
+# The Second order model has the highest R-squared value so we'll Obtain diagnostics and plots of the estimated response surfaces for  it
+
+# Diagnostic plots for the second-order model
+par(mfrow = c(2, 2))
+plot(model_so)
+
+
+# Contour plot for the second-order model
+contour(model_so, ~ x1 + x2, col = "blue", xlabs = c("x1", "x2"), zlab = "Response")
+
+library(plotly)
+
+# Prepare grid data for interactive plotting
+grid <- expand.grid(x1 = seq(min(data$x1), max(data$x1), length.out = 100),
+                    x2 = seq(min(data$x2), max(data$x2), length.out = 100))
+grid$y <- predict(model_so, newdata = grid)
+
+# Create a 3D plot
+plot_ly(grid, x = ~x1, y = ~x2, z = ~y, type = "surface")
+
+
+
+
+
+
+
+
+
+
+
+
+
